@@ -1,0 +1,13 @@
+<Solution>
+  <Project Path="HarborShield.Api/HarborShield.Api.csproj" />
+  <Project Path="HarborShield.AppHost/HarborShield.AppHost.csproj" />
+  <Project Path="HarborShield.Application/HarborShield.Application.csproj" />
+  <Project Path="HarborShield.Contracts/HarborShield.Contracts.csproj" />
+  <Project Path="HarborShield.Domain/HarborShield.Domain.csproj" />
+  <Project Path="HarborShield.Infrastructure/HarborShield.Infrastructure.csproj" />
+  <Project Path="HarborShield.IntegrationTests/HarborShield.IntegrationTests.csproj" />
+  <Project Path="HarborShield.RiskCopilot/HarborShield.RiskCopilot.csproj" />
+  <Project Path="HarborShield.ServiceDefaults/HarborShield.ServiceDefaults.csproj" />
+  <Project Path="HarborShield.UnitTests/HarborShield.UnitTests.csproj" />
+  <Project Path="HarborShield.Worker/HarborShield.Worker.csproj" />
+</Solution>

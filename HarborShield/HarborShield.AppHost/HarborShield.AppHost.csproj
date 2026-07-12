@@ -1,0 +1,16 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.2.4">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>8c79045a-f8b7-4649-9b61-cdc7703365b4</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HarborShield.Api\HarborShield.Api.csproj" />
+    <ProjectReference Include="..\HarborShield.Worker\HarborShield.Worker.csproj" />
+  </ItemGroup>
+
+</Project>

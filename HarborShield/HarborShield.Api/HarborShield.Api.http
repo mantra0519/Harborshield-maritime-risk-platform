@@ -1,0 +1,6 @@
+@HarborShield.Api_HostAddress = http://localhost:5058
+
+GET {{HarborShield.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
