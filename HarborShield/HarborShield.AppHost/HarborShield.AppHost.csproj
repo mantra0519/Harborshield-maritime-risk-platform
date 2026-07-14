@@ -13,4 +13,8 @@
     <ProjectReference Include="..\HarborShield.Worker\HarborShield.Worker.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MessagePack" Version="2.5.302" />
+  </ItemGroup>
+
 </Project>

@@ -427,3 +427,11 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Local RAG model files (downloaded via scripts/download-models.sh)
+*.gguf
+/models/
+
+# Per-developer local overrides (real local DB creds, API key, model paths) - never committed.
+# appsettings.json holds the same keys with blank placeholder values instead.
+appsettings.Development.json

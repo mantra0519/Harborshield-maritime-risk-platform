@@ -1,0 +1,7 @@
+**/bin/
+**/obj/
+**/.vs/
+*.user
+HarborShield.UnitTests/
+HarborShield.IntegrationTests/
+HarborShield.AppHost/

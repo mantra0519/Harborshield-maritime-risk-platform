@@ -1,0 +1,52 @@
+@page "{id:guid}"
+@model HarborShield.Api.Pages.RiskCases.DetailsModel
+
+<a class="back-link" href="/">← Back to dashboard</a>
+
+<div class="panel">
+    <h2>
+        @Model.RiskCase.CaseType
+        <span class="badge severity-@Model.RiskCase.Severity">@Model.RiskCase.Severity</span>
+        <span class="badge status-@Model.RiskCase.Status">@Model.RiskCase.Status</span>
+    </h2>
+
+    <table>
+        <tbody>
+            <tr><th style="width:180px;">Vessel</th><td>@Model.Vessel.Name (IMO @Model.Vessel.ImoNumber, @Model.Vessel.FlagCountry)</td></tr>
+            <tr><th>Risk score</th><td>@Model.RiskCase.RiskScore / 100</td></tr>
+            <tr><th>Created</th><td>@Model.RiskCase.CreatedAt.ToString("yyyy-MM-dd HH:mm 'UTC'")</td></tr>
+            @if (Model.RiskCase.ResolvedAt is not null)
+            {
+                <tr><th>Resolved</th><td>@Model.RiskCase.ResolvedAt.Value.ToString("yyyy-MM-dd HH:mm 'UTC'")</td></tr>
+                <tr><th>Resolution notes</th><td>@Model.RiskCase.ResolutionNotes</td></tr>
+            }
+        </tbody>
+    </table>
+
+    <h3>Why it was flagged (rule-based reasons)</h3>
+    <ul>
+        @foreach (var reason in Model.RiskCase.Reasons)
+        {
+            <li>@reason</li>
+        }
+    </ul>
+</div>
+
+<div class="panel">
+    <h2>AI Risk Copilot explanation</h2>
+    @if (!string.IsNullOrWhiteSpace(Model.RiskCase.CachedExplanation))
+    {
+        <div class="explanation-box">@Model.RiskCase.CachedExplanation</div>
+        <p class="muted">Generated locally by the Risk Copilot (retrieval over similar historical cases + a local LLM, no external API calls).</p>
+    }
+    else
+    {
+        <p class="muted">
+            No explanation generated yet. Generating one runs local LLM inference and can take
+            10-30 seconds on first request - the result is cached afterwards.
+        </p>
+        <form method="post" asp-page-handler="Explain">
+            <button type="submit" class="btn">Generate AI explanation</button>
+        </form>
+    }
+</div>

@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore HarborShield/HarborShield.slnx
+
+      - name: Build
+        run: dotnet build HarborShield/HarborShield.slnx --no-restore --configuration Release
+
+      - name: Build custom Postgres image (PostGIS + pgvector, used by integration tests)
+        run: docker build -t harborshield-maritime-risk-platform-postgres:latest ./docker/postgres
+
+      - name: Run unit tests
+        run: dotnet test HarborShield/HarborShield.UnitTests --no-build --configuration Release
+
+      - name: Run integration tests
+        run: dotnet test HarborShield/HarborShield.IntegrationTests --no-build --configuration Release

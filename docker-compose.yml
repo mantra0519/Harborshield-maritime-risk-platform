@@ -1,0 +1,64 @@
+services:
+  postgres:
+    build:
+      context: ./docker/postgres
+    container_name: harborshield-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: harborshield
+      POSTGRES_PASSWORD: harborshield
+      POSTGRES_DB: harborshield
+    ports:
+      - "5432:5432"
+    volumes:
+      - harborshield-postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U harborshield -d harborshield"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./HarborShield
+      dockerfile: HarborShield.Api/Dockerfile
+    container_name: harborshield-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__HarborShieldDb: "Host=postgres;Port=5432;Database=harborshield;Username=harborshield;Password=harborshield"
+      # Points at this same Api's own fake-vendor stub controller - see README for details.
+      SanctionsVendor__BaseUrl: "http://api:8080/"
+      RiskCopilot__GenerationModelPath: /models/Phi-3-mini-4k-instruct-q4.gguf
+      RiskCopilot__EmbeddingModelPath: /models/bge-small-en-v1.5-q8_0.gguf
+      Auth__ApiKey: dev-local-harborshield-key-2026
+    volumes:
+      - ./models:/models:ro
+
+  worker:
+    build:
+      context: ./HarborShield
+      dockerfile: HarborShield.Worker/Dockerfile
+    container_name: harborshield-worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DOTNET_ENVIRONMENT: Development
+      ConnectionStrings__HarborShieldDb: "Host=postgres;Port=5432;Database=harborshield;Username=harborshield;Password=harborshield"
+      SanctionsVendor__BaseUrl: "http://api:8080/"
+      RiskCopilot__GenerationModelPath: /models/Phi-3-mini-4k-instruct-q4.gguf
+      RiskCopilot__EmbeddingModelPath: /models/bge-small-en-v1.5-q8_0.gguf
+    volumes:
+      - ./models:/models:ro
+
+volumes:
+  harborshield-postgres-data:

@@ -1,0 +1,82 @@
+@page
+@model IndexModel
+
+<div class="panel">
+    <h2>What this is</h2>
+    <p>
+        HarborShield ingests vessel position/cargo data, flags anomalies (route deviation, restricted-zone
+        entry, tracking gaps), screens vessels against a sanctions vendor, and generates a plain-language
+        explanation of each risk case using a locally-hosted LLM (no external API calls). The data below
+        is real - stored in Postgres and served through the same CQRS/Mediator application layer the JSON
+        API uses.
+    </p>
+    <div class="tag-row">
+        <span class="tag">.NET 10</span>
+        <span class="tag">PostgreSQL + PostGIS + pgvector</span>
+        <span class="tag">Local RAG (LLamaSharp)</span>
+        <span class="tag">Polly resilience</span>
+        <span class="tag">API key auth</span>
+        <span class="tag">Rate limiting</span>
+    </div>
+    <p class="muted">
+        Full JSON API docs: <a href="/scalar">/scalar</a> (interactive, requires an
+        <code>X-Api-Key</code> header for write operations - see the README for the demo key).
+    </p>
+</div>
+
+<div class="panel">
+    <h2>Vessels (@Model.Vessels.Count)</h2>
+    @if (Model.Vessels.Count == 0)
+    {
+        <p class="empty-state">No vessels yet.</p>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr><th>Name</th><th>IMO</th><th>Flag</th><th>Registered</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var vessel in Model.Vessels)
+                {
+                    <tr>
+                        <td>@vessel.Name</td>
+                        <td>@vessel.ImoNumber</td>
+                        <td>@vessel.FlagCountry</td>
+                        <td class="muted">@vessel.CreatedAt.ToString("yyyy-MM-dd HH:mm 'UTC'")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<div class="panel">
+    <h2>Risk cases (@Model.RiskCases.Count)</h2>
+    @if (Model.RiskCases.Count == 0)
+    {
+        <p class="empty-state">No risk cases yet - report a vessel position through the API to trigger anomaly detection.</p>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr><th>Vessel</th><th>Type</th><th>Severity</th><th>Score</th><th>Status</th><th>Created</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var riskCase in Model.RiskCases)
+                {
+                    <tr>
+                        <td>@(Model.VesselNames.GetValueOrDefault(riskCase.VesselId, "Unknown"))</td>
+                        <td>@riskCase.CaseType</td>
+                        <td><span class="badge severity-@riskCase.Severity">@riskCase.Severity</span></td>
+                        <td>@riskCase.RiskScore</td>
+                        <td><span class="badge status-@riskCase.Status">@riskCase.Status</span></td>
+                        <td class="muted">@riskCase.CreatedAt.ToString("yyyy-MM-dd HH:mm 'UTC'")</td>
+                        <td><a asp-page="/RiskCases/Details" asp-route-id="@riskCase.Id">View →</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

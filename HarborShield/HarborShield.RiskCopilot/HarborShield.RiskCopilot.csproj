@@ -1,9 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <ProjectReference Include="..\HarborShield.Domain\HarborShield.Domain.csproj" />
+    <ProjectReference Include="..\HarborShield.Application\HarborShield.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LLamaSharp" Version="0.27.0" />
+    <PackageReference Include="LLamaSharp.Backend.Cpu" Version="0.27.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
+    <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Pgvector.EntityFrameworkCore 0.3.0 (latest) declares EF Core 9.x in its own nuspec,
+         but works correctly with EF Core 10 - already proven by the vector(384) migration
+         and queries elsewhere in this solution. -->
+    <NoWarn>NU1608</NoWarn>
   </PropertyGroup>
 
 </Project>
