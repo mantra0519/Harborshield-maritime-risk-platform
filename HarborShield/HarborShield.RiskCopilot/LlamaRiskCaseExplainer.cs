@@ -65,8 +65,8 @@ public class LlamaRiskCaseExplainer(
 
         sb.AppendLine(
             "You are a maritime risk analyst assistant. Explain why this risk case was flagged, " +
-            "in 3-5 concise sentences for a human investigator. Mention the most likely cause and " +
-            "whether similar cases have occurred before.");
+            "in 3-5 concise sentences. Mention the most likely cause and whether similar cases " +
+            "have occurred before.");
         sb.AppendLine();
         sb.AppendLine("Current case:");
         sb.AppendLine($"- Type: {current.CaseType}");
@@ -75,18 +75,22 @@ public class LlamaRiskCaseExplainer(
         sb.AppendLine($"- Reasons: {string.Join("; ", current.Reasons)}");
         sb.AppendLine();
 
-        if (similarCases.Count == 0)
-        {
-            sb.AppendLine("No similar historical cases were found.");
-        }
-        else
+        if (similarCases.Count > 0)
         {
             sb.AppendLine("Similar historical cases:");
             foreach (var similar in similarCases)
             {
                 sb.AppendLine($"- {similar.CaseType} (severity {similar.Severity}): {string.Join("; ", similar.Reasons)}");
             }
+            sb.AppendLine();
         }
+
+        // A final instruction right before the answer, restated in different words than the
+        // opening one - smaller models are more prone to just copying the case details back
+        // verbatim unless the "don't do that" instruction is the very last thing they read.
+        sb.AppendLine(
+            "Write only the explanation itself, in your own words - do not restate the fields " +
+            "above, do not add labels or headers, and do not mention if similar cases were not found.");
 
         return sb.ToString();
     }
@@ -104,7 +108,7 @@ public class LlamaRiskCaseExplainer(
 
         var inferenceParams = new InferenceParams
         {
-            MaxTokens = 150,
+            MaxTokens = 200,
             // Deliberately does NOT include "<|assistant|>" - the model emits that as its very
             // first token (a template artifact), so treating it as a stop condition would halt
             // generation before any real content. CleanUpResponse strips it as a leading marker
@@ -112,7 +116,9 @@ public class LlamaRiskCaseExplainer(
             AntiPrompts = ["User:", "System:", "<|user|>", "<|system|>", "<|end|>", "**Assistant"],
             SamplingPipeline = new DefaultSamplingPipeline
             {
-                RepeatPenalty = 1.3f
+                // Bumped from 1.3 for Phi-3-mini - Qwen2.5-0.5B is more prone to looping into a
+                // near-duplicate second paragraph restating the same point.
+                RepeatPenalty = 1.4f
             }
         };
 
@@ -139,7 +145,9 @@ public class LlamaRiskCaseExplainer(
     /// at the next one - that keeps the first real answer and discards everything after.
     /// </summary>
     private static readonly string[] TurnMarkers =
-        ["<|assistant|>", "<|user|>", "<|system|>", "<|end|>", "**Assistant", "Assistant:", "System:", "User:"];
+        ["<|assistant|>", "<|user|>", "<|system|>", "<|end|>", "<|im_start|>", "<|im_end|>",
+         "**Assistant", "Assistant:", "System:", "User:", "Human Investigator:", "Human investigator:",
+         "**Explanation:**", "Explanation:", "Risk Case:", "Risk case:"];
 
     private static string CleanUpResponse(string response)
     {

@@ -19,8 +19,8 @@ download_if_missing() {
 }
 
 download_if_missing \
-  "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf" \
-  "Phi-3-mini-4k-instruct-q4.gguf"
+  "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf" \
+  "qwen2.5-0.5b-instruct-q4_k_m.gguf"
 
 download_if_missing \
   "https://huggingface.co/ggml-org/bge-small-en-v1.5-Q8_0-GGUF/resolve/main/bge-small-en-v1.5-q8_0.gguf" \

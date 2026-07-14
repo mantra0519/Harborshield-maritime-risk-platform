@@ -59,14 +59,14 @@ Worker (background jobs)  ────────┘                    │
 - **CI**: GitHub Actions (restore, build, unit tests, integration tests against a real containerized Postgres)
 - **Containerization**: Multi-stage Dockerfiles for Api and Worker, `docker-compose.yml` for a one-command local stack
 - **Local orchestration (dev)**: .NET Aspire AppHost
-- **RAG (Risk Case Copilot)**: [LLamaSharp](https://github.com/SciSharp/LLamaSharp) running fully local, quantized GGUF models — `bge-small-en-v1.5` (embeddings, 384-dim, stored in pgvector) and `Phi-3-mini-4k-instruct` (generation) — no API key, no external network call
+- **RAG (Risk Case Copilot)**: [LLamaSharp](https://github.com/SciSharp/LLamaSharp) running fully local, quantized GGUF models — `bge-small-en-v1.5` (embeddings, 384-dim, stored in pgvector) and `Qwen2.5-0.5B-Instruct` (generation, ~500MB - chosen to keep the whole stack runnable on a small/free-tier cloud instance) — no API key, no external network call
 
 ## Running it
 
 ### Option A — Docker Compose (full stack, closest to "deployed")
 
 ```bash
-./scripts/download-models.sh          # downloads both GGUF models into ./models (~4 GB)
+./scripts/download-models.sh          # downloads both GGUF models into ./models (~530 MB)
 docker compose up -d --build
 ```
 

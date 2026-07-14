@@ -41,6 +41,12 @@ public class Program
             var explainer = scope.ServiceProvider.GetRequiredService<IRiskCaseExplainer>();
             var seedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
             await DemoDataSeeder.SeedAsync(db, explainer, seedLogger);
+
+            // Worker never generates explanations again after seeding (only RiskCaseEmbeddingWorker
+            // runs continuously, and it only needs the much smaller embedding model) - free the
+            // generation model's memory instead of holding it for the rest of this process's life.
+            var modelProvider = scope.ServiceProvider.GetRequiredService<ModelWeightsProvider>();
+            await modelProvider.UnloadGenerationWeightsAsync();
         }
 
         await host.RunAsync();
