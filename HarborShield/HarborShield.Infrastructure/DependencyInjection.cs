@@ -14,11 +14,17 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("HarborShieldDb")
-            ?? throw new InvalidOperationException("Connection string 'HarborShieldDb' is not configured.");
+        // Both of these resolve the connection string lazily, from a fully-built IServiceProvider/
+        // IConfiguration, rather than capturing it once eagerly here - eager capture happens before
+        // WebApplicationFactory's test overrides (e.g. the Testcontainers connection string) are
+        // applied, so tests would silently fall back to whatever appsettings.* has instead of the
+        // isolated test database. Same reasoning as the SanctionsScreeningClient client below.
+        static string GetConnectionString(IServiceProvider sp) =>
+            sp.GetRequiredService<IConfiguration>().GetConnectionString("HarborShieldDb")
+                ?? throw new InvalidOperationException("Connection string 'HarborShieldDb' is not configured.");
 
-        services.AddDbContext<HarborShieldDbContext>(options =>
-            options.UseNpgsql(connectionString, npgsql =>
+        services.AddDbContext<HarborShieldDbContext>((sp, options) =>
+            options.UseNpgsql(GetConnectionString(sp), npgsql =>
             {
                 npgsql.UseNetTopologySuite();
                 npgsql.UseVector();
@@ -29,7 +35,7 @@ public static class DependencyInjection
         // Tagged "ready" (not "live") so /alive stays a lightweight "is the process running"
         // check, while /health (readiness) genuinely verifies the database is reachable.
         services.AddHealthChecks()
-            .AddNpgSql(connectionString, name: "postgres", tags: ["ready"]);
+            .AddNpgSql(GetConnectionString, name: "postgres", tags: ["ready"]);
 
         services.AddHttpClient<ISanctionsScreeningClient, SanctionsScreeningClient>((sp, client) =>
             {
